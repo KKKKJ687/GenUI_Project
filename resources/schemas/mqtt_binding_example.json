@@ -1,0 +1,10 @@
+
+{
+  "panel": "temperature_slider",
+  "protocol": "MQTT",
+  "config": {
+    "topic": "home/temperature",
+    "data_type": "float",
+    "qos": 1
+  }
+}

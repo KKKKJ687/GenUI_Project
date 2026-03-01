@@ -1,0 +1,75 @@
+{
+  "$defs": {
+    "FixActionType": {
+      "description": "Types of automatic corrections the system can apply.",
+      "enum": [
+        "CLAMP",
+        "REJECT",
+        "EDIT",
+        "WARN",
+        "NONE"
+      ],
+      "title": "FixActionType",
+      "type": "string"
+    }
+  },
+  "description": "Record of a self-correction applied by the system.\n\nThis is the audit trail that proves the system is \"self-healing\".",
+  "properties": {
+    "fix_id": {
+      "description": "Unique ID for this fix event",
+      "title": "Fix Id",
+      "type": "string"
+    },
+    "violation_rule_id": {
+      "description": "Which rule violation triggered this fix",
+      "title": "Violation Rule Id",
+      "type": "string"
+    },
+    "action_type": {
+      "$ref": "#/$defs/FixActionType",
+      "description": "Type of fix applied"
+    },
+    "param_path": {
+      "description": "Path to the corrected parameter",
+      "title": "Param Path",
+      "type": "string"
+    },
+    "value_before": {
+      "description": "Original (unsafe) value",
+      "title": "Value Before"
+    },
+    "value_after": {
+      "description": "Corrected (safe) value",
+      "title": "Value After"
+    },
+    "reason": {
+      "description": "Why this fix was applied",
+      "title": "Reason",
+      "type": "string"
+    },
+    "diff_note": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Additional context for the change",
+      "title": "Diff Note"
+    }
+  },
+  "required": [
+    "fix_id",
+    "violation_rule_id",
+    "action_type",
+    "param_path",
+    "value_before",
+    "value_after",
+    "reason"
+  ],
+  "title": "FixAction",
+  "type": "object"
+}

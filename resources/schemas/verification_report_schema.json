@@ -1,0 +1,257 @@
+{
+  "$defs": {
+    "FixAction": {
+      "description": "Record of a self-correction applied by the system.\n\nThis is the audit trail that proves the system is \"self-healing\".",
+      "properties": {
+        "fix_id": {
+          "description": "Unique ID for this fix event",
+          "title": "Fix Id",
+          "type": "string"
+        },
+        "violation_rule_id": {
+          "description": "Which rule violation triggered this fix",
+          "title": "Violation Rule Id",
+          "type": "string"
+        },
+        "action_type": {
+          "$ref": "#/$defs/FixActionType",
+          "description": "Type of fix applied"
+        },
+        "param_path": {
+          "description": "Path to the corrected parameter",
+          "title": "Param Path",
+          "type": "string"
+        },
+        "value_before": {
+          "description": "Original (unsafe) value",
+          "title": "Value Before"
+        },
+        "value_after": {
+          "description": "Corrected (safe) value",
+          "title": "Value After"
+        },
+        "reason": {
+          "description": "Why this fix was applied",
+          "title": "Reason",
+          "type": "string"
+        },
+        "diff_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Additional context for the change",
+          "title": "Diff Note"
+        }
+      },
+      "required": [
+        "fix_id",
+        "violation_rule_id",
+        "action_type",
+        "param_path",
+        "value_before",
+        "value_after",
+        "reason"
+      ],
+      "title": "FixAction",
+      "type": "object"
+    },
+    "FixActionType": {
+      "description": "Types of automatic corrections the system can apply.",
+      "enum": [
+        "CLAMP",
+        "REJECT",
+        "EDIT",
+        "WARN",
+        "NONE"
+      ],
+      "title": "FixActionType",
+      "type": "string"
+    },
+    "Severity": {
+      "description": "Constraint violation severity level.",
+      "enum": [
+        "HARD",
+        "SOFT"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "SourceRef": {
+      "description": "Traceability back to the original Datasheet PDF.\nUsed for the 'Explanation' column in paper tables.\n\nThis is critical for academic credibility - every constraint\nmust be traceable to its source document.",
+      "properties": {
+        "datasheet_name": {
+          "description": "Filename of the source PDF",
+          "title": "Datasheet Name",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Page number",
+          "title": "Page"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Section header or Table name",
+          "title": "Section"
+        },
+        "snippet": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Raw text excerpt from the PDF",
+          "title": "Snippet"
+        },
+        "confidence": {
+          "default": 1.0,
+          "description": "Extraction confidence score",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "datasheet_name"
+      ],
+      "title": "SourceRef",
+      "type": "object"
+    },
+    "Violation": {
+      "description": "A specific instance of a rule being broken.\n\nExample:\n  A slider widget with max=5.0V when the datasheet specifies max=3.3V",
+      "properties": {
+        "rule_id": {
+          "description": "ID of the violated Constraint",
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "param_path": {
+          "description": "Path to the offending parameter (e.g., 'slider_01.max')",
+          "title": "Param Path",
+          "type": "string"
+        },
+        "observed_value": {
+          "description": "What the LLM generated",
+          "title": "Observed Value"
+        },
+        "expected_limit": {
+          "description": "What the datasheet allowed",
+          "title": "Expected Limit"
+        },
+        "unit": {
+          "default": "unitless",
+          "description": "Physical unit",
+          "title": "Unit",
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity",
+          "default": "HARD"
+        },
+        "message": {
+          "description": "Human readable error message",
+          "title": "Message",
+          "type": "string"
+        },
+        "source_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Link back to datasheet"
+        }
+      },
+      "required": [
+        "rule_id",
+        "param_path",
+        "observed_value",
+        "expected_limit",
+        "message"
+      ],
+      "title": "Violation",
+      "type": "object"
+    }
+  },
+  "description": "The complete audit log for a single generation run.\nContains all violations found and all fixes applied.\n\nThis is the primary data source for IEEE paper metrics:\n  - Violation rate per generation\n  - Fix success rate\n  - Distribution of violation types\n  - Residual risk analysis",
+  "properties": {
+    "passed": {
+      "description": "Is the final DSL safe to render?",
+      "title": "Passed",
+      "type": "boolean"
+    },
+    "score": {
+      "default": 100.0,
+      "description": "Safety score (0-100)",
+      "maximum": 100.0,
+      "minimum": 0.0,
+      "title": "Score",
+      "type": "number"
+    },
+    "violations": {
+      "items": {
+        "$ref": "#/$defs/Violation"
+      },
+      "title": "Violations",
+      "type": "array"
+    },
+    "fixes": {
+      "items": {
+        "$ref": "#/$defs/FixAction"
+      },
+      "title": "Fixes",
+      "type": "array"
+    },
+    "residual_risks": {
+      "description": "Unfixable warnings",
+      "items": {
+        "type": "string"
+      },
+      "title": "Residual Risks",
+      "type": "array"
+    },
+    "stats": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Stats",
+      "type": "object"
+    }
+  },
+  "required": [
+    "passed"
+  ],
+  "title": "VerificationReport",
+  "type": "object"
+}

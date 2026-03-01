@@ -1,0 +1,14 @@
+streamlit>=1.30.0
+google-generativeai>=0.3.0
+pandas
+pypdf
+beautifulsoup4
+requests
+openpyxl
+Pillow
+python-dotenv
+pint
+jsonpath-ng
+pdfplumber
+tabulate
+pymupdf

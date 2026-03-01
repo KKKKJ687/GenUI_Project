@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apple Style HMI Shell</title>
+  <style>
+    :root {
+      --bg-a: #f8f9fc;
+      --bg-b: #edf1f7;
+      --bg-c: #f4f6fb;
+      --surface: rgba(255, 255, 255, 0.76);
+      --surface-solid: #ffffff;
+      --text-main: #1d1d1f;
+      --text-sub: #6e6e73;
+      --line: rgba(15, 23, 42, 0.08);
+      --line-strong: rgba(15, 23, 42, 0.16);
+      --blue: #0071e3;
+      --blue-soft: #dceaff;
+      --green: #30d158;
+      --orange: #ff9f0a;
+      --red: #ff453a;
+      --shadow-1: 0 8px 20px rgba(15, 23, 42, 0.08);
+      --shadow-2: 0 24px 50px rgba(15, 23, 42, 0.1);
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --radius-sm: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      color: var(--text-main);
+      font-family: "SF Pro Display", "SF Pro Text", "PingFang SC", "Helvetica Neue", "Noto Sans SC", sans-serif;
+      background:
+        radial-gradient(circle at 10% 5%, #ffffff 0%, rgba(255, 255, 255, 0) 42%),
+        radial-gradient(circle at 92% 14%, #e8f0ff 0%, rgba(232, 240, 255, 0) 35%),
+        linear-gradient(160deg, var(--bg-a) 0%, var(--bg-b) 52%, var(--bg-c) 100%);
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      z-index: 0;
+      width: 360px;
+      height: 360px;
+      border-radius: 50%;
+      filter: blur(64px);
+      pointer-events: none;
+      opacity: 0.4;
+    }
+
+    body::before {
+      top: -140px;
+      right: -120px;
+      background: #b9d6ff;
+    }
+
+    body::after {
+      left: -160px;
+      bottom: -180px;
+      background: #d8ffec;
+    }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      width: min(1220px, 100%);
+      margin: 28px auto 40px;
+      padding: 0 22px 20px;
+      animation: shell-enter 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes shell-enter {
+      from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.985);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(16px);
+      animation: reveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation-delay: var(--delay, 0s);
+    }
+
+    @keyframes reveal {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .topbar,
+    .hero,
+    .panel,
+    .footer {
+      backdrop-filter: saturate(130%) blur(16px);
+      -webkit-backdrop-filter: saturate(130%) blur(16px);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-1);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 14px 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: linear-gradient(160deg, var(--blue), #4da3ff);
+      box-shadow: 0 0 0 6px var(--blue-soft);
+      flex: none;
+    }
+
+    .eyebrow {
+      margin: 0;
+      font-size: 11px;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      font-weight: 600;
+    }
+
+    .brand h1 {
+      margin: 2px 0 0;
+      font-size: 17px;
+      font-weight: 650;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .seg {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.7);
+      color: var(--text-sub);
+      border-radius: 999px;
+      font-size: 12px;
+      line-height: 1;
+      padding: 7px 11px;
+      font-weight: 600;
+    }
+
+    .seg.active {
+      border-color: #b9d6ff;
+      background: linear-gradient(180deg, #f7fbff, #eaf3ff);
+      color: #0059b7;
+    }
+
+    .runtime-pill {
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #14532d;
+      background: rgba(48, 209, 88, 0.15);
+      border: 1px solid rgba(48, 209, 88, 0.3);
+    }
+
+    .hero {
+      margin-top: 16px;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 18px;
+    }
+
+    .hero h2 {
+      margin: 8px 0 10px;
+      font-size: clamp(24px, 3.2vw, 34px);
+      line-height: 1.15;
+      font-weight: 640;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--text-sub);
+      font-size: 14px;
+      max-width: 66ch;
+    }
+
+    .hero-tags {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .hero-tags span {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.64);
+      color: #374151;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: var(--surface-solid);
+      padding: 12px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .metric .label {
+      font-size: 12px;
+      color: var(--text-sub);
+      font-weight: 600;
+    }
+
+    .metric .value {
+      margin-top: 4px;
+      font-size: 24px;
+      letter-spacing: -0.02em;
+      font-weight: 640;
+    }
+
+    .layout {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 0.95fr 1.35fr;
+      gap: 14px;
+    }
+
+    .panel {
+      padding: 16px;
+      min-height: 280px;
+    }
+
+    .panel h3 {
+      margin: 0 0 12px;
+      font-size: 17px;
+      font-weight: 640;
+      letter-spacing: -0.01em;
+    }
+
+    .controls-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .control-card {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: var(--surface-solid);
+      padding: 12px;
+      transition: transform 0.28s ease, box-shadow 0.28s ease;
+    }
+
+    .control-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .row .name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #2c2c2e;
+    }
+
+    .row .val {
+      font-size: 12px;
+      color: var(--text-sub);
+      font-weight: 600;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 5px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #d4e5ff, #b4d0ff);
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 0;
+      background: #ffffff;
+      box-shadow: 0 0 0 1px rgba(0, 113, 227, 0.36), 0 3px 8px rgba(0, 113, 227, 0.25);
+    }
+
+    .text-input,
+    .select-input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #ffffff;
+      padding: 9px 10px;
+      color: #1f2937;
+      font-size: 13px;
+      font-weight: 500;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .text-input:focus,
+    .select-input:focus {
+      border-color: rgba(0, 113, 227, 0.45);
+      box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.14);
+    }
+
+    .switch-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-flex;
+      width: 48px;
+      height: 28px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch-track {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: #d1d5db;
+      transition: background 0.26s ease;
+    }
+
+    .switch-track::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #ffffff;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+      transition: transform 0.26s ease;
+    }
+
+    .switch input:checked + .switch-track {
+      background: rgba(48, 209, 88, 0.88);
+    }
+
+    .switch input:checked + .switch-track::after {
+      transform: translateX(20px);
+    }
+
+    .readonly {
+      opacity: 0.82;
+      pointer-events: none;
+    }
+
+    .fault-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .fault-group label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      font-size: 12px;
+      padding: 7px 10px;
+      color: #374151;
+      font-weight: 600;
+    }
+
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .gauge-card,
+    .plot-card,
+    .log-card {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: var(--surface-solid);
+      padding: 12px;
+    }
+
+    .gauge-shell {
+      --pct: 50;
+      --ring: var(--blue);
+      width: 126px;
+      height: 126px;
+      margin: 2px auto 8px;
+      border-radius: 50%;
+      background: conic-gradient(var(--ring) calc(var(--pct) * 1%), #ebedf4 0%);
+      display: grid;
+      place-items: center;
+      transition: background 0.4s ease;
+    }
+
+    .gauge-core {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 10px 4px;
+    }
+
+    .gauge-axis {
+      font-size: 11px;
+      color: var(--text-sub);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .gauge-value {
+      margin-top: 3px;
+      font-size: 18px;
+      font-weight: 640;
+      letter-spacing: -0.02em;
+    }
+
+    .subnote {
+      margin: 0;
+      color: var(--text-sub);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .plot-card {
+      margin-top: 10px;
+    }
+
+    .plot-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .plot-head .big {
+      font-size: 22px;
+      font-weight: 640;
+      letter-spacing: -0.02em;
+    }
+
+    .plot-head .hint {
+      font-size: 12px;
+      color: var(--text-sub);
+      font-weight: 600;
+    }
+
+    .spark-wrap {
+      border-radius: 12px;
+      background: linear-gradient(180deg, #f7faff, #f2f6ff);
+      border: 1px solid #dce7ff;
+      padding: 8px;
+    }
+
+    .spark-svg {
+      width: 100%;
+      height: 130px;
+      display: block;
+    }
+
+    .spark-grid {
+      stroke: rgba(0, 113, 227, 0.13);
+      stroke-width: 1;
+    }
+
+    .spark-line {
+      fill: none;
+      stroke: #0071e3;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .log-card {
+      margin-top: 10px;
+    }
+
+    .log-head {
+      font-size: 13px;
+      color: var(--text-sub);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .event-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 6px;
+    }
+
+    .event-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fbfcff;
+      padding: 8px 9px;
+      font-size: 12px;
+    }
+
+    .event-item .time {
+      color: var(--text-sub);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .event-item .msg {
+      color: #334155;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .footer {
+      margin-top: 16px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    .footer strong {
+      color: #374151;
+      font-weight: 600;
+    }
+
+    @media (max-width: 1080px) {
+      .hero,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .telemetry-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 840px) {
+      .telemetry-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .metric-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .shell {
+        margin-top: 16px;
+        padding: 0 14px 20px;
+      }
+
+      .topbar,
+      .hero,
+      .panel {
+        border-radius: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar reveal" style="--delay: 0.02s;">
+      <div class="brand">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <div>
+          <p class="eyebrow">Independent Frontend Mock</p>
+          <h1>ADXL345 工业监测仪表盘 · 设计空壳</h1>
+        </div>
+      </div>
+      <div class="top-actions">
+        <span class="seg active">Overview</span>
+        <span class="seg">Control</span>
+        <span class="seg">Telemetry</span>
+        <span class="runtime-pill" id="runtime-pill">Runtime · 本地模拟中</span>
+      </div>
+    </header>
+
+    <section class="hero reveal" style="--delay: 0.08s;">
+      <div>
+        <p class="eyebrow">No Backend Connected</p>
+        <h2>苹果风格 HMI 前端空壳页面</h2>
+        <p>
+          此页面仅用于预览视觉和交互壳层，不接入后端、不发网络请求。保留核心控件布局与状态反馈，用于评估整体美观、信息层级和可读性。
+        </p>
+        <div class="hero-tags">
+          <span>Glass Surface</span>
+          <span>Soft Motion</span>
+          <span>Clear Contrast</span>
+          <span>Mobile Ready</span>
+        </div>
+      </div>
+
+      <div class="metric-grid">
+        <article class="metric">
+          <div class="label">VS 电压</div>
+          <div class="value" id="hero-vs">3.30V</div>
+        </article>
+        <article class="metric">
+          <div class="label">VDD I/O</div>
+          <div class="value" id="hero-vdd">3.30V</div>
+        </article>
+        <article class="metric">
+          <div class="label">数据率</div>
+          <div class="value" id="hero-rate">100Hz</div>
+        </article>
+        <article class="metric">
+          <div class="label">故障状态</div>
+          <div class="value" id="hero-fault">正常</div>
+        </article>
+      </div>
+    </section>
+
+    <main class="layout">
+      <section class="panel reveal" style="--delay: 0.13s;">
+        <h3>控制区</h3>
+        <div class="controls-list">
+          <article class="control-card">
+            <div class="row">
+              <span class="name">电源电压 (VS)</span>
+              <span class="val" id="vs-value">3.30 V</span>
+            </div>
+            <input id="vs-slider" type="range" min="2.0" max="3.6" step="0.1" value="3.3">
+          </article>
+
+          <article class="control-card">
+            <div class="row">
+              <span class="name">接口电压 (VDD I/O)</span>
+              <span class="val">1.7V ~ 3.6V</span>
+            </div>
+            <input id="vdd-input" class="text-input" type="number" min="1.7" max="3.6" step="0.1" value="3.3">
+          </article>
+
+          <article class="control-card">
+            <div class="row">
+              <span class="name">加速度量程</span>
+            </div>
+            <select id="range-select" class="select-input">
+              <option>±2g</option>
+              <option>±4g</option>
+              <option>±8g</option>
+              <option>±16g</option>
+            </select>
+          </article>
+
+          <article class="control-card">
+            <div class="row">
+              <span class="name">数据更新速率 (ODR)</span>
+              <span class="val" id="rate-hint">100Hz</span>
+            </div>
+            <select id="rate-select" class="select-input">
+              <option>100Hz</option>
+              <option>200Hz</option>
+              <option>400Hz</option>
+              <option>800Hz</option>
+              <option>1600Hz</option>
+              <option>3200Hz</option>
+            </select>
+          </article>
+
+          <article class="control-card">
+            <div class="switch-wrap">
+              <span class="name">运行使能</span>
+              <label class="switch">
+                <input id="run-enable" type="checkbox" checked>
+                <span class="switch-track"></span>
+              </label>
+            </div>
+          </article>
+
+          <article class="control-card readonly">
+            <div class="row">
+              <span class="name">故障状态 (只读)</span>
+            </div>
+            <div class="fault-group">
+              <label><input id="fault-ok" type="radio" name="fault" checked disabled> 正常</label>
+              <label><input id="fault-check" type="radio" name="fault" disabled> 校验失败</label>
+              <label><input id="fault-off" type="radio" name="fault" disabled> 无响应</label>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel reveal" style="--delay: 0.18s;">
+        <h3>遥测区</h3>
+        <div class="telemetry-grid">
+          <article class="gauge-card">
+            <div class="gauge-shell" id="gauge-x" style="--ring: #0071e3;">
+              <div class="gauge-core">
+                <div class="gauge-axis">X Axis</div>
+                <div class="gauge-value" id="x-value">0.00g</div>
+              </div>
+            </div>
+            <p class="subnote" id="x-range">范围: ±2g</p>
+          </article>
+
+          <article class="gauge-card">
+            <div class="gauge-shell" id="gauge-y" style="--ring: #30d158;">
+              <div class="gauge-core">
+                <div class="gauge-axis">Y Axis</div>
+                <div class="gauge-value" id="y-value">0.00g</div>
+              </div>
+            </div>
+            <p class="subnote" id="y-range">范围: ±2g</p>
+          </article>
+
+          <article class="gauge-card">
+            <div class="gauge-shell" id="gauge-z" style="--ring: #ff9f0a;">
+              <div class="gauge-core">
+                <div class="gauge-axis">Z Axis</div>
+                <div class="gauge-value" id="z-value">0.00g</div>
+              </div>
+            </div>
+            <p class="subnote" id="z-range">范围: ±2g</p>
+          </article>
+        </div>
+
+        <article class="plot-card">
+          <div class="plot-head">
+            <span class="big" id="temp-now">24.0°C</span>
+            <span class="hint">环境温度趋势（本地模拟）</span>
+          </div>
+          <div class="spark-wrap">
+            <svg class="spark-svg" viewBox="0 0 580 130" preserveAspectRatio="none" aria-label="temperature sparkline">
+              <path class="spark-grid" d="M0 26 H580 M0 52 H580 M0 78 H580 M0 104 H580"></path>
+              <path class="spark-line" id="spark-line" d=""></path>
+            </svg>
+          </div>
+        </article>
+
+        <article class="log-card">
+          <div class="log-head">最近事件</div>
+          <ul class="event-list" id="event-list">
+            <li class="event-item"><span class="msg">系统初始化完成</span><span class="time">--:--:--</span></li>
+            <li class="event-item"><span class="msg">安全守卫已启用</span><span class="time">--:--:--</span></li>
+            <li class="event-item"><span class="msg">等待本地模拟数据</span><span class="time">--:--:--</span></li>
+          </ul>
+        </article>
+      </section>
+    </main>
+
+    <footer class="footer reveal" style="--delay: 0.24s;">
+      <span><strong>说明:</strong> 该页面为独立静态设计稿，不依赖后端服务。</span>
+      <span>文件可直接双击打开进行视觉评审。</span>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      const ui = {
+        runtimePill: document.getElementById("runtime-pill"),
+        heroVs: document.getElementById("hero-vs"),
+        heroVdd: document.getElementById("hero-vdd"),
+        heroRate: document.getElementById("hero-rate"),
+        heroFault: document.getElementById("hero-fault"),
+        vsSlider: document.getElementById("vs-slider"),
+        vsValue: document.getElementById("vs-value"),
+        vddInput: document.getElementById("vdd-input"),
+        rangeSelect: document.getElementById("range-select"),
+        rateSelect: document.getElementById("rate-select"),
+        rateHint: document.getElementById("rate-hint"),
+        runEnable: document.getElementById("run-enable"),
+        xValue: document.getElementById("x-value"),
+        yValue: document.getElementById("y-value"),
+        zValue: document.getElementById("z-value"),
+        xRange: document.getElementById("x-range"),
+        yRange: document.getElementById("y-range"),
+        zRange: document.getElementById("z-range"),
+        gaugeX: document.getElementById("gauge-x"),
+        gaugeY: document.getElementById("gauge-y"),
+        gaugeZ: document.getElementById("gauge-z"),
+        tempNow: document.getElementById("temp-now"),
+        sparkLine: document.getElementById("spark-line"),
+        eventList: document.getElementById("event-list"),
+        faultOk: document.getElementById("fault-ok"),
+        faultCheck: document.getElementById("fault-check"),
+        faultOff: document.getElementById("fault-off")
+      };
+
+      const rangeMap = {
+        "±2g": 2,
+        "±4g": 4,
+        "±8g": 8,
+        "±16g": 16
+      };
+
+      const state = {
+        running: true,
+        rangeLabel: "±2g",
+        range: 2,
+        vs: 3.3,
+        vdd: 3.3,
+        rate: 100,
+        x: 0,
+        y: 0,
+        z: 0,
+        temp: 24,
+        history: Array.from({ length: 36 }, function (_, i) {
+          return 24 + Math.sin(i / 4) * 2;
+        })
+      };
+
+      let timer = null;
+
+      function nowTime() {
+        const d = new Date();
+        return d.toTimeString().slice(0, 8);
+      }
+
+      function pushEvent(text) {
+        const li = document.createElement("li");
+        li.className = "event-item";
+        li.innerHTML = "<span class='msg'></span><span class='time'></span>";
+        li.querySelector(".msg").textContent = text;
+        li.querySelector(".time").textContent = nowTime();
+        ui.eventList.prepend(li);
+        while (ui.eventList.children.length > 3) {
+          ui.eventList.removeChild(ui.eventList.lastChild);
+        }
+      }
+
+      function toFixed(value) {
+        return Number(value).toFixed(2);
+      }
+
+      function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+      }
+
+      function setGauge(node, value, range) {
+        const pct = ((value + range) / (range * 2)) * 100;
+        node.style.setProperty("--pct", String(clamp(pct, 0, 100)));
+      }
+
+      function renderSparkline() {
+        const data = state.history;
+        const min = -40;
+        const max = 85;
+        const width = 580;
+        const height = 130;
+        const points = data.map(function (v, i) {
+          const x = (i / (data.length - 1)) * width;
+          const y = height - ((v - min) / (max - min)) * height;
+          return x.toFixed(2) + " " + y.toFixed(2);
+        });
+        ui.sparkLine.setAttribute("d", "M" + points.join(" L"));
+      }
+
+      function renderFault(label) {
+        ui.faultOk.checked = label === "正常";
+        ui.faultCheck.checked = label === "校验失败";
+        ui.faultOff.checked = label === "无响应";
+        ui.heroFault.textContent = label;
+      }
+
+      function renderStatic() {
+        ui.vsValue.textContent = toFixed(state.vs) + " V";
+        ui.heroVs.textContent = toFixed(state.vs) + "V";
+        ui.heroVdd.textContent = toFixed(state.vdd) + "V";
+        ui.heroRate.textContent = state.rate + "Hz";
+        ui.rateHint.textContent = state.rate + "Hz";
+        ui.xRange.textContent = "范围: " + state.rangeLabel;
+        ui.yRange.textContent = "范围: " + state.rangeLabel;
+        ui.zRange.textContent = "范围: " + state.rangeLabel;
+      }
+
+      function renderDynamic() {
+        ui.xValue.textContent = toFixed(state.x) + "g";
+        ui.yValue.textContent = toFixed(state.y) + "g";
+        ui.zValue.textContent = toFixed(state.z) + "g";
+        ui.tempNow.textContent = toFixed(state.temp) + "°C";
+
+        setGauge(ui.gaugeX, state.x, state.range);
+        setGauge(ui.gaugeY, state.y, state.range);
+        setGauge(ui.gaugeZ, state.z, state.range);
+        renderSparkline();
+      }
+
+      function updateRuntimePill() {
+        if (state.running) {
+          ui.runtimePill.textContent = "Runtime · 本地模拟中";
+          ui.runtimePill.style.color = "#14532d";
+          ui.runtimePill.style.background = "rgba(48, 209, 88, 0.15)";
+          ui.runtimePill.style.borderColor = "rgba(48, 209, 88, 0.3)";
+        } else {
+          ui.runtimePill.textContent = "Runtime · 已暂停";
+          ui.runtimePill.style.color = "#92400e";
+          ui.runtimePill.style.background = "rgba(255, 159, 10, 0.14)";
+          ui.runtimePill.style.borderColor = "rgba(255, 159, 10, 0.32)";
+        }
+      }
+
+      function sampleTelemetry() {
+        if (!state.running) {
+          return;
+        }
+
+        const span = state.range;
+        state.x = clamp(state.x + (Math.random() - 0.5) * 0.9, -span, span);
+        state.y = clamp(state.y + (Math.random() - 0.5) * 0.8, -span, span);
+        state.z = clamp(state.z + (Math.random() - 0.5) * 0.7, -span, span);
+
+        state.temp = clamp(state.temp + (Math.random() - 0.5) * 0.9, -40, 85);
+        state.history.push(state.temp);
+        if (state.history.length > 36) {
+          state.history.shift();
+        }
+
+        const faultRoll = Math.random();
+        if (faultRoll < 0.92) {
+          renderFault("正常");
+        } else if (faultRoll < 0.98) {
+          renderFault("校验失败");
+        } else {
+          renderFault("无响应");
+        }
+
+        renderDynamic();
+      }
+
+      function startLoop() {
+        if (timer) {
+          clearInterval(timer);
+        }
+        const interval = Math.max(200, 1300 - Math.floor(state.rate / 3));
+        timer = setInterval(sampleTelemetry, interval);
+      }
+
+      function bind() {
+        ui.vsSlider.addEventListener("input", function (e) {
+          state.vs = clamp(Number(e.target.value), 2.0, 3.6);
+          renderStatic();
+        });
+
+        ui.vddInput.addEventListener("change", function (e) {
+          state.vdd = clamp(Number(e.target.value), 1.7, 3.6);
+          e.target.value = state.vdd.toFixed(1);
+          renderStatic();
+          pushEvent("VDD I/O 调整为 " + state.vdd.toFixed(1) + "V");
+        });
+
+        ui.rangeSelect.addEventListener("change", function (e) {
+          state.rangeLabel = e.target.value;
+          state.range = rangeMap[state.rangeLabel] || 2;
+          state.x = clamp(state.x, -state.range, state.range);
+          state.y = clamp(state.y, -state.range, state.range);
+          state.z = clamp(state.z, -state.range, state.range);
+          renderStatic();
+          renderDynamic();
+          pushEvent("量程切换至 " + state.rangeLabel);
+        });
+
+        ui.rateSelect.addEventListener("change", function (e) {
+          const n = Number(String(e.target.value).replace("Hz", "")) || 100;
+          state.rate = n;
+          renderStatic();
+          startLoop();
+          pushEvent("数据率切换至 " + state.rate + "Hz");
+        });
+
+        ui.runEnable.addEventListener("change", function (e) {
+          state.running = e.target.checked;
+          updateRuntimePill();
+          pushEvent(state.running ? "已启用采样模拟" : "已暂停采样模拟");
+        });
+      }
+
+      bind();
+      renderFault("正常");
+      renderStatic();
+      renderDynamic();
+      updateRuntimePill();
+      startLoop();
+      pushEvent("系统初始化完成");
+    })();
+  </script>
+</body>
+</html>

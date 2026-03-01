@@ -1,0 +1,132 @@
+/* style.css - Apple Aesthetic for Streamlit */
+
+/* 1. 全局字体设置：优先使用苹果系统原生字体 (SF Pro) */
+html,
+body,
+[class*="css"] {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    color: #1d1d1f !important;
+    /* Apple 深灰色文字 */
+    background-color: #fbfbfd !important;
+    /* Apple 极浅灰背景 */
+}
+
+/* 2. 主内容区域容器化：卡片式设计 */
+.main .block-container {
+    background-color: #ffffff;
+    padding: 3rem 2rem !important;
+    border-radius: 18px;
+    /* 大圆角 */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    /* 极其柔和的阴影 */
+    max-width: 900px;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* 3. 标题排版优化 */
+h1 {
+    font-weight: 700 !important;
+    letter-spacing: -0.015em !important;
+    font-size: 2.2rem !important;
+}
+
+h2,
+h3 {
+    font-weight: 600 !important;
+    letter-spacing: -0.01em !important;
+}
+
+/* 4. 侧边栏美化 */
+[data-testid="stSidebar"] {
+    background-color: #f2f2f7 !important;
+    /* Apple 侧边栏标准灰 */
+    border-right: 1px solid #e5e5e5;
+}
+
+[data-testid="stSidebar"] h1 {
+    font-size: 1.2rem !important;
+    color: #86868b !important;
+    /* 次要文字颜色 */
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* 5. 输入框组件优化 (文本框、下拉菜单、多行文本) */
+.stTextInput input,
+.stSelectbox>div>div,
+.stTextArea textarea {
+    border-radius: 10px !important;
+    border: 1px solid #d2d2d7 !important;
+    /* 柔和的边框 */
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    box-shadow: none !important;
+    padding: 0.5rem 0.8rem !important;
+    transition: all 0.2s ease-in-out;
+}
+
+/* 输入框聚焦时的状态：苹果蓝光晕 */
+.stTextInput input:focus,
+.stSelectbox>div>div:focus,
+.stTextArea textarea:focus {
+    border-color: #0071e3 !important;
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15) !important;
+}
+
+/* 6. 文件上传区域优化 */
+[data-testid="stFileUploader"] {
+    border: 1px dashed #d2d2d7;
+    border-radius: 12px;
+    padding: 1rem;
+    background-color: #f9f9f9;
+}
+
+/* 7. 核心按钮优化：标志性的苹果蓝药丸按钮 */
+.stButton>button {
+    border-radius: 30px !important;
+    /* 药丸形状 */
+    font-weight: 500 !important;
+    font-size: 1rem !important;
+    background-color: #0071e3 !important;
+    /* Apple Blue */
+    color: white !important;
+    border: none !important;
+    padding: 0.6rem 2rem !important;
+    width: 100%;
+    /* 按钮撑满宽度 */
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.stButton>button:hover {
+    background-color: #0077ed !important;
+    /* 悬停稍微变亮 */
+    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3) !important;
+}
+
+.stButton>button:active {
+    background-color: #006edb !important;
+    /* 点击变暗 */
+    transform: scale(0.99);
+    /* 轻微的点击反馈 */
+}
+
+/* 8. 状态展开条 (Status Expander) 优化 */
+.stStatusWidget {
+    border-radius: 12px !important;
+    border: 1px solid #f0f0f0 !important;
+    background-color: #fafafa !important;
+    box-shadow: none !important;
+}
+
+/* 隐藏 Streamlit 默认的菜单和页脚 */
+#MainMenu {
+    visibility: hidden;
+}
+
+footer {
+    visibility: hidden;
+}
+
+header {
+    visibility: hidden;
+}

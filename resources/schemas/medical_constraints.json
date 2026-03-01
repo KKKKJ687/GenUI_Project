@@ -1,0 +1,38 @@
+{
+  "device_name": "MedFlow-9000 Smart Infusion Driver",
+  "version": "2.0.4",
+  "constraints": [
+    {
+      "id": "MAX_FLOW_RATE",
+      "name": "最大安全流速限制",
+      "description": "为防止患者心脏负荷过大，普通模式下注射流速严禁超过 1200 ml/h。",
+      "kind": "max",
+      "applies_to": "widgets[?(@.id=='flow_rate_setpoint')].max",
+      "max_val": 1200.0,
+      "unit": "ml/h",
+      "severity": "HARD"
+    },
+    {
+      "id": "MANDATORY_ALARM_AIR",
+      "name": "气泡报警必选项",
+      "description": "根据 IEC 60601-2-24 标准，必须包含管路气泡（Air-in-Line）检测报警开关。",
+      "kind": "exists",
+      "applies_to": "widgets[?(@.id=='alarm_air_bubble')]",
+      "severity": "HARD"
+    },
+    {
+      "id": "VTBI_LIMIT",
+      "name": "预置输液量限制",
+      "description": "单次预置输液量 (VTBI) 不得超过注射器最大容量 50ml。",
+      "kind": "max",
+      "applies_to": "widgets[?(@.id=='vtbi_setting')].max",
+      "max_val": 50.0,
+      "unit": "ml",
+      "severity": "SOFT"
+    }
+  ],
+  "metadata": {
+    "protocol": "HL7-FHIR",
+    "safety_class": "Class III"
+  }
+}

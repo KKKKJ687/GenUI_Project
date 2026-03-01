@@ -1,0 +1,46 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+.venv/
+env/
+.env
+
+# Pytest
+.pytest_cache/
+test_results.json
+test_reports/
+reports/
+
+# Mac
+.DS_Store
+
+# Project Specific
+temp/
+runs/
+test_runs/
+out_figures/
+out_tables/

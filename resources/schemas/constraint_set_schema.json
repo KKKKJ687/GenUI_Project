@@ -1,0 +1,234 @@
+{
+  "$defs": {
+    "Constraint": {
+      "description": "A single physical rule derived from a datasheet.\n\nExamples:\n  - \"Input Voltage must not exceed 3.3V\"\n  - \"PWM frequency must be between 1kHz and 100kHz\"\n  - \"Protocol must be one of: SPI, I2C, UART\"",
+      "properties": {
+        "id": {
+          "description": "Unique rule ID (e.g., 'C001_VCC_MAX')",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "description": "Human readable name",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "kind": {
+          "$ref": "#/$defs/ConstraintKind",
+          "description": "Logic type of the constraint"
+        },
+        "applies_to": {
+          "description": "Selector string identifying target parameters",
+          "title": "Applies To",
+          "type": "string"
+        },
+        "min_val": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Val"
+        },
+        "max_val": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Val"
+        },
+        "allowed_values": {
+          "anyOf": [
+            {
+              "items": {},
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Allowed Values"
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pattern"
+        },
+        "unit": {
+          "default": "unitless",
+          "description": "Physical unit for error messages",
+          "title": "Unit",
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity",
+          "default": "HARD"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Where did this rule come from?"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "applies_to"
+      ],
+      "title": "Constraint",
+      "type": "object"
+    },
+    "ConstraintKind": {
+      "description": "Type of constraint logic.",
+      "enum": [
+        "range",
+        "max",
+        "min",
+        "enum",
+        "regex",
+        "type"
+      ],
+      "title": "ConstraintKind",
+      "type": "string"
+    },
+    "Severity": {
+      "description": "Constraint violation severity level.",
+      "enum": [
+        "HARD",
+        "SOFT"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "SourceRef": {
+      "description": "Traceability back to the original Datasheet PDF.\nUsed for the 'Explanation' column in paper tables.\n\nThis is critical for academic credibility - every constraint\nmust be traceable to its source document.",
+      "properties": {
+        "datasheet_name": {
+          "description": "Filename of the source PDF",
+          "title": "Datasheet Name",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Page number",
+          "title": "Page"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Section header or Table name",
+          "title": "Section"
+        },
+        "snippet": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Raw text excerpt from the PDF",
+          "title": "Snippet"
+        },
+        "confidence": {
+          "default": 1.0,
+          "description": "Extraction confidence score",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "datasheet_name"
+      ],
+      "title": "SourceRef",
+      "type": "object"
+    }
+  },
+  "description": "A collection of constraints for a specific hardware device.\n\nThis replaces ad-hoc 'system prompt' logic with structured,\nverifiable rules that can be:\n  - Extracted from PDFs via RAG\n  - Validated by the Verifier engine\n  - Audited for correctness",
+  "properties": {
+    "device_name": {
+      "description": "Name of the hardware device",
+      "title": "Device Name",
+      "type": "string"
+    },
+    "version": {
+      "default": "1.0",
+      "description": "Constraint set version",
+      "title": "Version",
+      "type": "string"
+    },
+    "constraints": {
+      "items": {
+        "$ref": "#/$defs/Constraint"
+      },
+      "title": "Constraints",
+      "type": "array"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "title": "Metadata",
+      "type": "object"
+    }
+  },
+  "required": [
+    "device_name"
+  ],
+  "title": "ConstraintSet",
+  "type": "object"
+}

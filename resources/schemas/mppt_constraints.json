@@ -1,0 +1,21 @@
+{
+  "device_name": "LabMaster-X1",
+  "constraints": [
+    {
+      "id": "MAX_HEATER_TEMP",
+      "kind": "max",
+      "applies_to": "widgets[?(@.label contains '温度')].max",
+      "max_val": 350.0,
+      "unit": "°C",
+      "description": "陶瓷加热盘物理极限，超过此温度会导致退磁。"
+    },
+    {
+      "id": "MAX_STIR_SPEED",
+      "kind": "max",
+      "applies_to": "widgets[?(@.label contains '转速')].max",
+      "max_val": 1500.0,
+      "unit": "RPM",
+      "description": "电机最大额定转速。"
+    }
+  ]
+}

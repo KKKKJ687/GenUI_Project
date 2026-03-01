@@ -1,0 +1,501 @@
+{
+  "$defs": {
+    "DataBinding": {
+      "description": "Connects the UI widget to a backend protocol.",
+      "properties": {
+        "protocol": {
+          "$ref": "#/$defs/ProtocolType",
+          "default": "mock",
+          "description": "Communication protocol"
+        },
+        "address": {
+          "description": "Topic (MQTT) or Register Address (Modbus)",
+          "title": "Address",
+          "type": "string"
+        },
+        "access_mode": {
+          "default": "rw",
+          "description": "Read/Write permission",
+          "enum": [
+            "r",
+            "w",
+            "rw"
+          ],
+          "title": "Access Mode",
+          "type": "string"
+        },
+        "update_interval_ms": {
+          "default": 1000,
+          "description": "Refresh rate in milliseconds",
+          "minimum": 100,
+          "title": "Update Interval Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "address"
+      ],
+      "title": "DataBinding",
+      "type": "object"
+    },
+    "GaugeWidget": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "Unique identifier for the widget",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "description": "Human-readable label displayed on UI",
+          "title": "Label",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Tooltip or helper text",
+          "title": "Description"
+        },
+        "disabled": {
+          "default": false,
+          "title": "Disabled",
+          "type": "boolean"
+        },
+        "binding": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DataBinding"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "safety": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SafetyPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "type": {
+          "const": "gauge",
+          "default": "gauge",
+          "title": "Type",
+          "type": "string"
+        },
+        "min": {
+          "default": 0.0,
+          "title": "Min",
+          "type": "number"
+        },
+        "max": {
+          "default": 100.0,
+          "title": "Max",
+          "type": "number"
+        },
+        "value": {
+          "default": 0.0,
+          "title": "Value",
+          "type": "number"
+        },
+        "thresholds": {
+          "description": "Color change thresholds [low, high]",
+          "items": {
+            "type": "number"
+          },
+          "title": "Thresholds",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "GaugeWidget",
+      "type": "object"
+    },
+    "LayoutItem": {
+      "description": "Defines position and size in a grid system.\nx, y: Grid coordinates\nw, h: Grid span",
+      "properties": {
+        "i": {
+          "description": "Matches the widget_id",
+          "title": "I",
+          "type": "string"
+        },
+        "x": {
+          "default": 0,
+          "minimum": 0,
+          "title": "X",
+          "type": "integer"
+        },
+        "y": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Y",
+          "type": "integer"
+        },
+        "w": {
+          "default": 1,
+          "minimum": 1,
+          "title": "W",
+          "type": "integer"
+        },
+        "h": {
+          "default": 1,
+          "minimum": 1,
+          "title": "H",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "i"
+      ],
+      "title": "LayoutItem",
+      "type": "object"
+    },
+    "ProtocolType": {
+      "enum": [
+        "mqtt",
+        "modbus",
+        "http",
+        "mock"
+      ],
+      "title": "ProtocolType",
+      "type": "string"
+    },
+    "SafetyPolicy": {
+      "description": "Physical constraints for the hardware.\nUsed by the Verifier to clamp/reject dangerous values.",
+      "properties": {
+        "max_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Absolute maximum safe value (hardware limit)",
+          "title": "Max Value"
+        },
+        "min_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Absolute minimum safe value",
+          "title": "Min Value"
+        },
+        "forbidden_values": {
+          "description": "Specific values to reject (e.g. resonance frequencies)",
+          "items": {
+            "type": "number"
+          },
+          "title": "Forbidden Values",
+          "type": "array"
+        },
+        "requires_confirmation": {
+          "default": false,
+          "description": "If True, UI prompts user before sending",
+          "title": "Requires Confirmation",
+          "type": "boolean"
+        },
+        "unit": {
+          "default": "unitless",
+          "description": "Physical unit (e.g., V, A, Hz)",
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "title": "SafetyPolicy",
+      "type": "object"
+    },
+    "SliderWidget": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "Unique identifier for the widget",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "description": "Human-readable label displayed on UI",
+          "title": "Label",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Tooltip or helper text",
+          "title": "Description"
+        },
+        "disabled": {
+          "default": false,
+          "title": "Disabled",
+          "type": "boolean"
+        },
+        "binding": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DataBinding"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "safety": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SafetyPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "type": {
+          "const": "slider",
+          "default": "slider",
+          "title": "Type",
+          "type": "string"
+        },
+        "min": {
+          "default": 0.0,
+          "title": "Min",
+          "type": "number"
+        },
+        "max": {
+          "default": 100.0,
+          "title": "Max",
+          "type": "number"
+        },
+        "step": {
+          "default": 1.0,
+          "title": "Step",
+          "type": "number"
+        },
+        "value": {
+          "default": 0.0,
+          "description": "Default/Initial value",
+          "title": "Value",
+          "type": "number"
+        },
+        "vertical": {
+          "default": false,
+          "title": "Vertical",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "SliderWidget",
+      "type": "object"
+    },
+    "SwitchWidget": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "Unique identifier for the widget",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "description": "Human-readable label displayed on UI",
+          "title": "Label",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Tooltip or helper text",
+          "title": "Description"
+        },
+        "disabled": {
+          "default": false,
+          "title": "Disabled",
+          "type": "boolean"
+        },
+        "binding": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DataBinding"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "safety": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SafetyPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "type": {
+          "const": "switch",
+          "default": "switch",
+          "title": "Type",
+          "type": "string"
+        },
+        "on_label": {
+          "default": "ON",
+          "title": "On Label",
+          "type": "string"
+        },
+        "off_label": {
+          "default": "OFF",
+          "title": "Off Label",
+          "type": "string"
+        },
+        "value": {
+          "default": false,
+          "description": "Default state",
+          "title": "Value",
+          "type": "boolean"
+        },
+        "color_on": {
+          "default": "green",
+          "title": "Color On",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "SwitchWidget",
+      "type": "object"
+    },
+    "ThemeType": {
+      "enum": [
+        "dark",
+        "light",
+        "industrial_blue"
+      ],
+      "title": "ThemeType",
+      "type": "string"
+    }
+  },
+  "description": "Root object for the HMI DSL.\nThis is what the Architect Agent must output.",
+  "properties": {
+    "version": {
+      "default": "0.1",
+      "description": "DSL version",
+      "title": "Version",
+      "type": "string"
+    },
+    "title": {
+      "description": "Panel title",
+      "title": "Title",
+      "type": "string"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Description"
+    },
+    "theme": {
+      "$ref": "#/$defs/ThemeType",
+      "default": "dark"
+    },
+    "widgets": {
+      "description": "List of all widget definitions",
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "gauge": "#/$defs/GaugeWidget",
+            "slider": "#/$defs/SliderWidget",
+            "switch": "#/$defs/SwitchWidget"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/SliderWidget"
+          },
+          {
+            "$ref": "#/$defs/SwitchWidget"
+          },
+          {
+            "$ref": "#/$defs/GaugeWidget"
+          }
+        ]
+      },
+      "title": "Widgets",
+      "type": "array"
+    },
+    "layout": {
+      "description": "Grid layout configuration matching widget IDs",
+      "items": {
+        "$ref": "#/$defs/LayoutItem"
+      },
+      "title": "Layout",
+      "type": "array"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "description": "Extra context (generation time, model used, etc.)",
+      "title": "Metadata",
+      "type": "object"
+    }
+  },
+  "required": [
+    "title",
+    "widgets",
+    "layout"
+  ],
+  "title": "HMIPanel",
+  "type": "object"
+}
