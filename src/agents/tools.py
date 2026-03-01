@@ -605,7 +605,7 @@ class SearchTool:
 
 class ToolBelt(SearchTool):
     """
-    Main tool wrapper compatible with the existing GenUI app.
+    Main tool wrapper compatible with the existing GenerativeUI app.
     Inherits robustness and fallback from SearchTool.
     """
     def __init__(self):

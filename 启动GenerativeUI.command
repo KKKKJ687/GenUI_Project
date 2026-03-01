@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================
-#  GenUI Agent — 双击启动
+#  GenerativeUI Project — 双击启动
 # ============================================
 
 # 切换到脚本所在目录（即项目根目录）
@@ -23,7 +23,7 @@ if ! command -v streamlit &> /dev/null; then
     pip install -r requirements.txt
 fi
 
-echo "🚀 正在启动 GenUI Agent..."
+echo "🚀 正在启动 GenerativeUI Project..."
 echo "   浏览器将自动打开，如未打开请访问 http://localhost:8501"
 echo ""
 streamlit run app.py

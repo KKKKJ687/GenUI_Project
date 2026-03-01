@@ -1,5 +1,5 @@
 """
-Interactive Component Templates for GenUI Agent (Phase 3.2).
+Interactive Component Templates for GenerativeUI Project (Phase 3.2).
 Provides code examples to guide LLM in generating interactive components.
 Now supports dynamic injection based on tags.
 """

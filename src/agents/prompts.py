@@ -1,5 +1,5 @@
 """
-Prompt Management Module for GenUI Agent
+Prompt Management Module for GenerativeUI Project
 Modularized prompts based on the paper's methodology
 """
 
@@ -426,4 +426,3 @@ TASK: Fix the JSON to comply with the HMIPanel schema.
 
 Output ONLY the corrected JSON. Do not explain. Start with {{ and end with }}.
 """
-

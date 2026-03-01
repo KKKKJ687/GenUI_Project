@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 # 获取项目根目录 (假设此文件在 src/utils/config.py)
-# .parent = src/utils, .parent = src, .parent = GenUI_Project
+# .parent = src/utils, .parent = src, .parent = GenerativeUI_Project
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 RESOURCES_DIR = PROJECT_ROOT / "resources"
 SCHEMAS_DIR = RESOURCES_DIR / "schemas"
@@ -102,4 +102,3 @@ class AblationConfig:
 
 # Default configuration
 DEFAULT_ABLATION = AblationConfig()
-

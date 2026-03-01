@@ -47,8 +47,8 @@ GenerativeUI_Project/
 1. 克隆仓库并进入目录
 
 ```bash
-git clone https://github.com/KKKKJ687/GenUI_Project.git
-cd GenUI_Project
+git clone https://github.com/KKKKJ687/GenUI_Project.git GenerativeUI_Project
+cd GenerativeUI_Project
 ```
 
 2. 创建虚拟环境并安装依赖
@@ -73,7 +73,7 @@ streamlit run app.py
 
 也可以使用快速启动脚本：
 
-启动GenUI.command
+启动GenerativeUI.command
 
 ## 已包含的 Sample 演示
 

@@ -1,5 +1,5 @@
 总体验收口径（项目完成的定义）
-GenUI Project Specification
+GenerativeUI Project Specification
 2026 年1 月28 日
 系统闭环定义
 系统需满足以下闭环流程：
@@ -11,7 +11,7 @@ GenUI Project Specification
 • 论文级记录：每次运行都能产出可用于论文的结构化记录：违规率、修正率、成功率、延
 迟、可用性等。
 1 基线固化与工程卫生（1 个里程碑：能稳定跑）
-目标：你现有GenUI 不改思路，先让它稳定、可回归、可测，作为对照组（Baseline）。
+目标：你现有GenerativeUI 不改思路，先让它稳定、可回归、可测，作为对照组（Baseline）。
 1.1 依赖/结构完整性检查
 • 任务：补齐缺失模块、统一入口、整理requirements、加scripts/health_check.py。
 • 验收：

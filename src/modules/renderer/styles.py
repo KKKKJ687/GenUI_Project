@@ -1,5 +1,5 @@
 """
-UI Style Templates for GenUI Agent
+UI Style Templates for GenerativeUI Project
 Provides various pre-defined UI styles based on the paper's methodology
 """
 
