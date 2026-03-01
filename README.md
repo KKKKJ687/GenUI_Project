@@ -1,7 +1,8 @@
 # GenUI Project
 
-GenUI 是一个面向工业/HMI 场景的生成式 UI 原型项目。  
-核心流程是把自然语言需求转换为可验证的 DSL/HTML，并通过约束验证与修复机制降低风险。
+随着工业 4.0 的推进，工业物联网（IIoT）设备的交互界面（HMI）需求激增。虽然大型语言模型（LLM）在通用代码生成上表现优异，但其本质是基于概率的预测模型，缺乏物理世界的常识。在工业场景下，LLM 极易产生“参数幻觉（Parameter Hallucination）”（例如：为仅支持 3.3V 的电机生成 0-100V 的调节滑块），从而导致设备损坏或严重安全事故。
+
+本项目提出并实现了一种物理感知（Physics-Aware）的神经符号生成架构。通过多模态 RAG 引擎摄取非结构化的硬件 PDF 数据手册（Datasheet），提取物理约束并构建强类型 DSL 中间层。结合基于符号逻辑的安全校验器（Verifier），系统能够实现对危险参数的自动拦截与闭环自愈，将“自然语言需求”安全、确定地转化为“工业级 HMI 界面”。
 
 ## 核心能力
 
@@ -70,12 +71,9 @@ export GOOGLE_API_KEY="your_key_here"
 streamlit run app.py
 ```
 
-也可以使用启动脚本：
+也可以使用快速启动脚本：
 
-```bash
-chmod +x start.sh
-./start.sh
-```
+启动GenUI.command
 
 ## 已包含的 Sample 演示
 
@@ -87,32 +85,6 @@ chmod +x start.sh
 - `runs/20260301_055331_288_t1tms5/metrics.json`：运行指标
 - `runs/20260301_055331_288_t1tms5/session_log.json`：运行日志
 - `runs/20260301_055331_288_t1tms5/intermediate/`：中间轮次产物
-
-## 常用脚本
-
-1. 离线健康检查（推荐先跑）
-
-```bash
-python scripts/health_check.py --mock-llm
-```
-
-2. 在线健康检查（需要 API Key）
-
-```bash
-python scripts/health_check.py --api-key "$GOOGLE_API_KEY"
-```
-
-3. 简化演示（验证器 + 自动修复 + 渲染）
-
-```bash
-python demo_simple.py
-```
-
-4. 渲染确定性检查
-
-```bash
-python scripts/render_example.py
-```
 
 ## 运行产物说明（run artifacts）
 
@@ -142,13 +114,3 @@ chmod +x start.sh
 3. 依赖安装慢或失败
 - 先升级 pip：`python -m pip install -U pip`
 - 然后重新安装：`pip install -r requirements.txt`
-
-## 开发与贡献
-
-- 提交前建议运行：
-
-```bash
-python scripts/health_check.py --mock-llm
-```
-
-- 建议通过 Pull Request 方式提交改动，并附上关键运行截图或 `runs/<run_id>/metrics.json` 结果。
